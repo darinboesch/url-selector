@@ -1,0 +1,23 @@
+
+.DS_Store
+.vscode
+nodemon.json
+
+## Excludes all node_module directories
+node_modules/
+
+## Exclude all log files (including npm-debug.log)
+*.log
+
+## Exclude all Vim swp files
+*.swp
+
+## Exclude MS/Libre Office swap files
+~$*.pptx
+~$*.docx
+~$*.xlsx
+
+## Exclude pyc files
+*.pyc
+
+config.dev.js

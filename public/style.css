@@ -1,0 +1,44 @@
+.Navbar__navbar___2_3df {
+  margin-bottom: 0;
+}.Footer__footer___1UUC6 {
+  position: absolute;
+  bottom: 0;
+  width: 100%;
+  height: 60px;
+  padding-right: 20px;
+  padding-left: 20px;
+}
+
+.Footer__footer___1UUC6 > hr {
+  margin-bottom: 12px;
+}
+.Panel__favorite___PBLR2 {
+  cursor: pointer;
+  float: left;
+}
+
+.Panel__delete___1xrYC {
+  cursor: pointer;
+  color: red;
+  float: right;
+}
+
+.Panel__urlName___1eG3f {
+  padding-left: 8px;
+}
+
+.Panel__gold___WilQx {
+  color: gold;
+}
+
+.Panel__heading___36P98 {
+  line-height: 14px;
+}.UrlForm__button____SFN4 {
+  float: right;
+  margin-top: 10px;
+}
+
+.UrlForm__form___2pJFM {
+  margin-bottom: 60px;
+  margin-top: 60px;
+}
