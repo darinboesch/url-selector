@@ -15,8 +15,7 @@ class Favorites extends Component {
   }
   getUrls() {
     API.getUrls().then((res) => {
-      const favoriteUrls = res.data.filter(url => url.favorited);
-      this.setState({ urls: favoriteUrls });
+      this.setState({ urls: res.data });
     });
   }
   renderUrls() {
@@ -24,8 +23,8 @@ class Favorites extends Component {
       <Panel
         url={url}
         key={url._id}
-        showFavorite={true}
-        showDelete={true}
+        showFavorite
+        showDelete
         getUrls={this.getUrls}
       />
     ));
@@ -33,11 +32,8 @@ class Favorites extends Component {
   render() {
     return (
       <div>
-        <div className="jumbotron text-center">
-          <h1>Your Favorite URLs</h1>
-          <p>Domains you will want to remember...</p>
-        </div>
         <div className="container">
+          <hr />
           <div className="row">
             {this.renderUrls()}
           </div>

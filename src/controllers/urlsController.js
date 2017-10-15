@@ -2,7 +2,7 @@ const Url = require("../models/url");
 const url = require("url");
 const request = require("request");
 const async = require("async");
-const config = require("../config.dev");
+const config = require("../../config.dev");
 
 function callGcsApi(companies, cb) {
   const asyncTasks = [];
@@ -48,7 +48,7 @@ module.exports = {
     const qs_params = url.parse(req.url, true).query;
     // the documentation requested 'companies[]' for the query string argument
     // i don't endorse using []'s inside of a query string, but i took the challenge.
-    const parms = qs_params['companies\[\]'];
+    const parms = qs_params['companies[]'];
     let companies = [];
     if (typeof parms === 'string') {
       companies.push(parms);
@@ -67,7 +67,7 @@ module.exports = {
           doc.data.push(url);
 
           // remove company so it's not called for the gcs api        
-          for (var i=companies.length-1; i>=0; i--) {
+          for (let i=companies.length-1; i>=0; i--) {
             if (companies[i].toLowerCase() === url.name.toLowerCase()) {
               companies.splice(i, 1);
             }
@@ -95,10 +95,8 @@ module.exports = {
       });
   },
   index: function(req, res) {
-    if (req.query) {
-      query = req.query;
-    }
-    else {
+    let query = req.query;
+    if (!query) {
       query = req.params.id ? { _id: req.params.id } : {};
     }
 

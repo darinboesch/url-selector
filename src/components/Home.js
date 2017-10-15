@@ -34,12 +34,12 @@ class Home extends Component {
   }
   renderError() {
     if (this.state.error) {
-      return <div className="row">
+      return (<div className="row">
                <div className="alert alert-dismissible alert-danger">
                  <button type="button" className="close" data-dismiss="alert">&times;</button>
                  {this.state.error}
                </div>
-             </div>;
+             </div>);
     }
   }
   render() {

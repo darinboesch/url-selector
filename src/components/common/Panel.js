@@ -1,13 +1,20 @@
 import React, { Component } from "react";
+import PropTypes from "prop-types";
 import API from "../../utils/API";
 import styles from './Panel.css';
 
 class Panel extends Component {
-  favoriteUrl(url) {
-    API.favoriteUrl(url).then(this.props.getUrls);
+  constructor(props) {
+    super(props);
+
+    this.handleDeleteClick = this.handleDeleteClick.bind(this);
+    this.handleFavoriteClick = this.handleFavoriteClick.bind(this);
   }
-  deleteUrl(id) {
-    API.deleteUrl(id).then(this.props.getUrls);
+  handleFavoriteClick() {
+    API.favoriteUrl(this.props.url).then(this.props.getUrls);
+  }
+  handleDeleteClick() {
+    API.favoriteUrl(this.props.url._id).then(this.props.getUrls);
   }
   render() {
     return (
@@ -15,13 +22,13 @@ class Panel extends Component {
         <div className="panel panel-default">
           <div className={"panel-heading " + styles.heading}>
             <i
-              onClick={() => this.favoriteUrl(this.props.url)}
+              onClick={this.handleFavoriteClick}
               style={{ display: this.props.showFavorite ? "block" : "none" }}
               className={styles.favorite + " " + (this.props.url.favorited ? "fa fa-star " + styles.gold : "fa fa-star-o")}
               aria-hidden="true"
             />
             <i
-              onClick={() => this.deleteUrl(this.props.url._id)}
+              onClick={this.handleDeleteClick}
               style={{ display: this.props.showDelete ? "block" : "none" }}
               className={styles.delete + " " + "fa fa-trash-o"}
               aria-hidden="true"
@@ -40,5 +47,12 @@ class Panel extends Component {
 }
 
 Panel.defaultProps = { showFavorite: false, showDelete: false };
+
+Panel.propTypes = {
+  getUrls: PropTypes.func.isRequired,
+  url: PropTypes.object.isRequired,
+  showFavorite: PropTypes.bool,
+  showDelete: PropTypes.bool
+};
 
 export default Panel;

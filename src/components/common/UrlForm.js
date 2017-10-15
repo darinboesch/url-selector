@@ -1,4 +1,5 @@
 import React, { Component } from "react";
+import PropTypes from "prop-types";
 import API from "../../utils/API";
 import styles from "./UrlForm.css";
 
@@ -48,5 +49,9 @@ class UrlForm extends Component {
     );
   }
 }
+
+UrlForm.propTypes = {
+  getUrls: PropTypes.func.isRequired
+};
 
 export default UrlForm;

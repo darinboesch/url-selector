@@ -1,8 +1,8 @@
-var express = require("express");
+const express = require("express");
 
-var urlsController = require("../controllers/urlsController");
+const urlsController = require("../controllers/urlsController");
 
-var router = new express.Router();
+const router = new express.Router();
 
 router.get("/url", urlsController.fetch);         // hits gcs
 router.get("/urls/:id?", urlsController.index);
