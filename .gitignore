@@ -4,6 +4,7 @@
 nodemon.json
 
 node_modules/
+dist/
 
 *.log
 *.swp

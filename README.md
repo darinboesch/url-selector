@@ -8,7 +8,6 @@ Additionally, searches are stored (cached) in MongoDB. The "Home" menu item let'
 
 ```
   npm install
-  npm run dev
   npm run start
 ```
 
