@@ -16,7 +16,7 @@ const compiler = webpack(config);
 const db = process.env.MONGODB_URI || "mongodb://localhost/urlSelectorApp";
 
 mongoose.Promise = bluebird;
-mongoose.connect(db, function(error) {
+mongoose.connect(db, { useMongoClient: true }, function(error) {
   if (error) {
     console.error(error);
   }
