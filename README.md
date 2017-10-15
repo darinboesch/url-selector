@@ -4,7 +4,7 @@ Web application where given a company name, it displays the domain associated to
 
 Additionally, searches are stored (cached) in MongoDB. The "Home" menu item let's you create URLs by querying the API. The "All" menu will display all previous searches, and provide you with options to either delete them, or add them to your favorites (each of these options are available by clicking the trash can or star icons, respectively). Finally, there is a "Favorites" menu that will display your favorites.
 
-## Quickstart
+## Quickstart (Dev Mode)
 
 ```
   npm install
@@ -16,6 +16,12 @@ Additionally, searches are stored (cached) in MongoDB. The "Home" menu item let'
 Navigate to localhost:3000 in your browser.
 
 ![app](app.png)
+
+## Create Release Distribution
+
+```
+  npm run build
+```
 
 ## Configuration
 
