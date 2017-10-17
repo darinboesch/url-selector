@@ -1,26 +1,17 @@
 import React, { Component } from "react";
+import {bindActionCreators} from 'redux';
+import {connect} from 'react-redux';
+import PropTypes from "prop-types";
 import Panel from "./common/Panel";
-import API from "../utils/API";
 
 class Favorites extends Component {
-  constructor() {
-    super();
-    this.state = {
-      urls: []
-    };
-    this.getUrls = this.getUrls.bind(this);
-  }
-  componentDidMount() {
-    this.getUrls();
-  }
-  getUrls() {
-    API.getUrls().then((res) => {
-      const favoriteUrls = res.data.filter(url => url.favorited);
-      this.setState({ urls: favoriteUrls });
-    });
+  constructor(props, content) {
+    super(props, content);
   }
   renderUrls() {
-    return this.state.urls.map(url => (
+    const {urls} = this.props;
+
+    return urls.map(url => (
       <Panel
         url={url}
         key={url._id}
@@ -47,4 +38,14 @@ class Favorites extends Component {
   }
 }
 
-export default Favorites;
+Favorites.propTypes = {
+  urls: PropTypes.array.isRequired
+};
+
+function mapStateToProps(state, ownProps) {
+  return {
+    urls: state.urls.filter(url => url.favorited)
+  };
+}
+
+export default connect(mapStateToProps)(Favorites);

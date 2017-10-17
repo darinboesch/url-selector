@@ -2,19 +2,41 @@ import React, { Component } from "react";
 import PropTypes from "prop-types";
 import API from "../../utils/API";
 import styles from './Panel.css';
+import toastr from 'toastr';
+
+import * as urlActions from '../../actions/urlActions';
+import {connect} from 'react-redux';
+import {bindActionCreators} from 'redux';
 
 class Panel extends Component {
-  constructor(props) {
-    super(props);
+  constructor(props, context) {
+    super(props, context);
+
+    this.state = {
+      url: Object.assign({}, this.props.url)
+    };
 
     this.handleDeleteClick = this.handleDeleteClick.bind(this);
     this.handleFavoriteClick = this.handleFavoriteClick.bind(this);
   }
   handleFavoriteClick() {
-    API.favoriteUrl(this.props.url).then(this.props.getUrls);
+    event.preventDefault();
+
+    this.props.actions.favoriteUrl(this.state.url)
+      //.then(() => this.redirect())   figure out how to change the state
+      .then()
+      .catch(error => {
+        toastr.error(error);
+      });
   }
   handleDeleteClick() {
-    API.favoriteUrl(this.props.url._id).then(this.props.getUrls);
+    event.preventDefault();
+
+    this.props.actions.deleteUrl(this.state.url)
+      .then()
+      .catch(error => {
+        toastr.error(error);
+      });
   }
   render() {
     return (
@@ -24,7 +46,7 @@ class Panel extends Component {
             <i
               onClick={this.handleFavoriteClick}
               style={{ display: this.props.showFavorite ? "block" : "none" }}
-              className={styles.favorite + " " + (this.props.url.favorited ? "fa fa-star " + styles.gold : "fa fa-star-o")}
+              className={styles.favorite + " " + (this.state.url.favorited ? "fa fa-star " + styles.gold : "fa fa-star-o")}
               aria-hidden="true"
             />
             <i
@@ -33,11 +55,11 @@ class Panel extends Component {
               className={styles.delete + " " + "fa fa-trash-o"}
               aria-hidden="true"
             />
-            <span className={styles.urlName}>{this.props.url.name}</span>
+            <span className={styles.urlName}>{this.state.url.name}</span>
           </div>
           <div className="panel-body">
             <div>
-              <span>{this.props.url.domain}</span>
+              <span>{this.state.url.domain}</span>
             </div>
           </div>
         </div>
@@ -49,10 +71,30 @@ class Panel extends Component {
 Panel.defaultProps = { showFavorite: false, showDelete: false };
 
 Panel.propTypes = {
-  getUrls: PropTypes.func.isRequired,
   url: PropTypes.object.isRequired,
   showFavorite: PropTypes.bool,
-  showDelete: PropTypes.bool
+  showDelete: PropTypes.bool,
+  actions: PropTypes.object.isRequired
 };
 
-export default Panel;
+function getUrlById(urls, id) {
+  const url = urls.filter(url => url._id == id);
+  if (url) return url[0];
+  return null;
+}
+
+function mapStateToProps(state, ownProps) {
+  const urlId = ownProps.url._id;
+
+  return {
+    url: getUrlById(state.urls, urlId)
+  };
+}
+
+function mapDispatchToProps(dispatch) {
+  return {
+    actions: bindActionCreators(urlActions, dispatch)
+  };
+}
+
+export default connect(mapStateToProps, mapDispatchToProps)(Panel);

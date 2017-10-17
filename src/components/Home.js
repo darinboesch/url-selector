@@ -1,30 +1,37 @@
 import React, { Component } from "react";
+import PropTypes from "prop-types";
 import Panel from "./common/Panel";
 import UrlForm from "./common/UrlForm";
 import API from "../utils/API";
+import {connect} from 'react-redux';
+import {bindActionCreators} from 'redux';
 
 class Home extends Component {
-  constructor() {
-    super();
+  constructor(props, context) {
+    super(props, context);
+
     this.state = {
       urls: [],
       error: ""
     };
-    this.getUrls = this.getUrls.bind(this);
+
+//    this.getUrls = this.getUrls.bind(this);
   }
-  componentDidMount() {
-    this.getUrls();
-  }
-  getUrls(companyNames) {
-    API.fetchUrls(companyNames)
-      .then(res => {
-        this.setState({ urls: res.data });
-      }).catch(err => {
-        this.setState({ error: `Error occurred fetching URLs: ${err}`});
-      });
-  }
+  // componentDidMount() {
+  //   this.getUrls();
+  // }
+  // getUrls(companyNames) {
+  //   API.fetchUrls(companyNames)
+  //     .then(res => {
+  //       this.setState({ urls: res.data });
+  //     }).catch(err => {
+  //       this.setState({ error: `Error occurred fetching URLs: ${err}`});
+  //     });
+  // }
   renderUrls() {
-    return this.state.urls.map(url => (
+    const {urls} = this.props;
+
+    return urls.map(url => (
       <Panel
         url={url}
         key={url._id}
@@ -60,4 +67,15 @@ class Home extends Component {
   }
 }
 
-export default Home;
+Home.propTypes = {
+  urls: PropTypes.array.isRequired
+};
+
+function mapStateToProps(state, ownProps) {
+  return {
+    // urls: state.urls
+    urls: []
+  };
+}
+
+export default connect(mapStateToProps)(Home);
