@@ -1,11 +1,13 @@
 import {combineReducers} from 'redux';
 import ajaxCallsInProgress from './ajaxStatusReducer';
-import newUrls from './newUrlReducer';
 import urls from './urlReducer';
+import newUrls from './newUrlReducer';
+import searchText from './searchReducer';
 
 const rootReducer = combineReducers({
   ajaxCallsInProgress,
   newUrls,
+  searchText,
   urls
 });
 

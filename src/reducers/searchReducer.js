@@ -1,10 +1,10 @@
 import * as types from '../actions/actionTypes';
 import initialState from './initialState';
 
-export default function newUrlReducer(state = initialState.newUrls, action) {
+export default function searchReducer(state = initialState.searchText, action) {
   switch (action.type) {
     case types.LOAD_URLS_BY_COMPANY_LIST_SUCCESS:
-      return action.urls;
+      return '';
 
     case types.LOAD_URLS_BY_COMPANY_LIST_FAIL:
       // todo: something here

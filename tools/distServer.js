@@ -2,7 +2,7 @@ import express from 'express';
 import mongoose from 'mongoose';
 import bluebird from 'bluebird';
 import bodyParser from 'body-parser';
-import routes from '../src/routes/routes';
+// import routes from '../src/routes/routes';
 import path from 'path';
 import open from 'open';
 import compression from 'compression';
@@ -27,11 +27,14 @@ app.use(bodyParser.urlencoded({ extended: true }));
 app.use(bodyParser.json());
 app.use(compression());
 app.use(express.static('dist'));
-app.use("/", routes);
 
-app.get('*', function(req, res) {
-  res.sendFile(path.join(__dirname, '../dist/index.html'));
-});
+//app.use("/", routes);
+require("../src/routes/apiRoutes")(app);
+require("../src/routes/htmlRoutes")(app);
+
+// app.get('*', function(req, res) {
+//   res.sendFile(path.join(__dirname, '../dist/index.html'));
+// });
 
 app.listen(port, function(err) {
   if (err) {

@@ -1,13 +1,6 @@
 import axios from "axios";
 
 class UrlApi {
-  static getNewUrls() {
-
-    // todo: do this correctly
-    
-    return axios.get("/api/urls");
-  }
-
   static getAllUrls() {
     return axios.get("/api/urls");
   }
@@ -22,6 +15,17 @@ class UrlApi {
   static favoriteUrl(url) {
     const { _id, favorited } = url;
     return axios.patch(`/api/urls/${_id}`, { favorited });
+  }
+
+  static getUrlsForCompanies(companies) {
+    let qs = '';
+    for (let i=0; i<companies.length; i++) {
+      let pre = i === 0 ? '?' : '&';
+      let encCompany = encodeURIComponent(companies[i]);
+      qs += `${pre}companies[]=${encCompany}`;
+    }
+
+    return axios.get("/api/urls" + qs);
   }
 }
 

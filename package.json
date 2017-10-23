@@ -26,10 +26,11 @@
     "babel-polyfill": "6.8.0",
     "bluebird": "^3.4.7",
     "body-parser": "^1.15.2",
+    "bootstrap": "^3.3.7",
     "colors": "^1.1.2",
     "express": "^4.14.0",
     "jquery": "^3.2.1",
-    "mongoose": "^4.7.5",
+    "mongoose": "^4.12.4",
     "npm-run-all": "^4.1.1",
     "prop-types": "^15.6.0",
     "react": "^15.4.1",
@@ -40,8 +41,7 @@
     "redux-thunk": "^2.2.0",
     "request": "^2.82.0",
     "rimraf": "^2.6.2",
-    "toastr": "^2.1.2",
-    "url": "^0.11.0"
+    "toastr": "^2.1.2"
   },
   "devDependencies": {
     "autoprefixer-core": "^5.1.11",
@@ -65,8 +65,10 @@
     "extract-text-webpack-plugin": "^0.8.1",
     "immutable": "^3.8.2",
     "jsdom": "^8.5.0",
+    "json-loader": "^0.5.7",
     "mocha": "^4.0.1",
     "nock": "^9.0.22",
+    "node-loader": "^0.6.0",
     "open": "0.0.5",
     "postcss-loader": "^0.4.3",
     "redux-immutable": "^4.0.0",

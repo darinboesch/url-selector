@@ -17,7 +17,6 @@ class Favorites extends Component {
         key={url._id}
         showFavorite
         showDelete
-        getUrls={this.getUrls}
       />
     ));
   }

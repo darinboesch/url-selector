@@ -1,12 +1,10 @@
 import React, { Component } from "react";
+import {bindActionCreators} from 'redux';
+import {connect} from 'react-redux';
 import PropTypes from "prop-types";
-import API from "../../utils/API";
 import styles from './Panel.css';
 import toastr from 'toastr';
-
 import * as urlActions from '../../actions/urlActions';
-import {connect} from 'react-redux';
-import {bindActionCreators} from 'redux';
 
 class Panel extends Component {
   constructor(props, context) {
@@ -23,8 +21,6 @@ class Panel extends Component {
     event.preventDefault();
 
     this.props.actions.favoriteUrl(this.state.url)
-      //.then(() => this.redirect())   figure out how to change the state
-      .then()
       .catch(error => {
         toastr.error(error);
       });
@@ -33,7 +29,6 @@ class Panel extends Component {
     event.preventDefault();
 
     this.props.actions.deleteUrl(this.state.url)
-      .then()
       .catch(error => {
         toastr.error(error);
       });

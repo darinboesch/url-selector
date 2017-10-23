@@ -39,6 +39,7 @@ All.propTypes = {
 };
 
 function mapStateToProps(state, ownProps) {
+  console.log(state);
   return {
     urls: state.urls
   };
