@@ -1,24 +1,52 @@
 import React, { Component } from "react";
+import {bindActionCreators} from 'redux';
+import {connect} from 'react-redux';
 import PropTypes from "prop-types";
-import API from "../../utils/API";
+import toastr from 'toastr';
 import styles from "./UrlForm.css";
+import * as urlActions from '../../actions/urlActions';
+
+const maxCompanies = 25;
 
 class UrlForm extends Component {
-  constructor() {
-    super();
+  constructor(props, content) {
+    super(props, content);
+
     this.state = {
-      inputValue: ""
+      companies: []
     };
+
     this.handleInputChange = this.handleInputChange.bind(this);
-    this.handleButtonClick = this.handleButtonClick.bind(this);
+    this.handleSubmitClick = this.handleSubmitClick.bind(this);
   }
   handleInputChange(event) {
-    this.setState({ inputValue: event.target.value });
+    event.preventDefault();
+
+    const arrCompanies = event.target.value.trim().split(/\s*,\s*/);
+    const valuesSoFar = Object.create(null);
+    for (let i=0, count=0; i<arrCompanies.length; i++) {
+      if (arrCompanies[i].length > 0) {
+        if (++count > maxCompanies) {
+          this.setState({ companies: null });
+          return toastr.error(`You cannot provide more than ${maxCompanies} values.`);
+        }
+
+        if (arrCompanies[i] in valuesSoFar) {
+          this.setState({ companies: null });
+          return toastr.error("All values must be unique.");
+        }
+        valuesSoFar[arrCompanies[i]] = true;
+      }
+    }
+
+    this.setState({ companies: Object.keys(valuesSoFar) });
   }
-  handleButtonClick() {
-    const companyNames = this.state.inputValue;
-    this.props.getUrls(companyNames);
-    //this.setState({ inputValue: "" });
+  handleSubmitClick() {
+    event.preventDefault();
+    this.props.actions.loadUrlsByCompanyList(this.state.companies)
+      .catch(error => {
+        toastr.error(error);
+      });
   }
   render() {
     return (
@@ -32,15 +60,15 @@ class UrlForm extends Component {
               resize: "none"
             }}
             onChange={this.handleInputChange}
-            value={this.state.inputValue}
             placeholder="Add Company Names here!"
             className="form-control"
             id="input-box"
             rows="3"
           />
           <button
-            onClick={this.handleButtonClick}
+            onClick={this.handleSubmitClick}
             className={"btn btn-default " + styles.button}
+            disabled={!this.state.companies || this.state.companies.length === 0}
           >
             Submit
           </button>
@@ -51,7 +79,18 @@ class UrlForm extends Component {
 }
 
 UrlForm.propTypes = {
-  getUrls: PropTypes.func.isRequired
+  actions: PropTypes.object.isRequired
 };
 
-export default UrlForm;
+function mapStateToProps(state, ownProps) {
+  return {
+  };
+}
+
+function mapDispatchToProps(dispatch) {
+  return {
+    actions: bindActionCreators(urlActions, dispatch)
+  };
+}
+
+export default connect(mapStateToProps, mapDispatchToProps)(UrlForm);

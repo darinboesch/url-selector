@@ -31,7 +31,7 @@ export default function urlReducer(state = initialState.urls, action) {
       return [
         ...state.filter(url => url._id !== action.url._id)
       ];
-      
+
     default:
       return state;
   }

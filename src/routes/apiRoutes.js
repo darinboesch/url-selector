@@ -1,13 +1,8 @@
-const express = require("express");
-
 const urlsController = require("../controllers/urlsController");
 
-const router = new express.Router();
-
-router.get("/url", urlsController.fetch);         // hits gcs
-router.get("/urls/:id?", urlsController.index);
-router.post("/urls", urlsController.create);
-router.patch("/urls/:id", urlsController.update);
-router.delete("/urls/:id", urlsController.destroy);
-
-module.exports = router;
+module.exports = function(app) {
+  app.get("/api/urls/:id?", urlsController.index);
+  app.post("/api/urls", urlsController.create);
+  app.patch("/api/urls/:id", urlsController.update);
+  app.delete("/api/urls/:id", urlsController.destroy);
+};

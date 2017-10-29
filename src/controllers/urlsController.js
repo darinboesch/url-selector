@@ -1,112 +1,82 @@
-const Url = require("../models/url");
-const url = require("url");
-const request = require("request");
-const async = require("async");
-const config = require("../../config.dev");
+const mongoose = require("mongoose");
+const Url = mongoose.model("Url");
+import async from "async";
 
-function callGcsApi(companies, cb) {
-  const asyncTasks = [];
-  const { url, cx, key } = config.gcsApi;
-  const items = [];
-
-  companies.forEach(name => {
-    const query = `${url}?q=${name}&cx=${cx}&key=${key}&num=1`;
-    asyncTasks.push(cb => {
-      request(query, cb);
+function companyWorker(companies, urls) {
+  return new Promise((resolve, reject) => {
+    urls.forEach(url => {
+      // remove company so it's not called for the gcs api        
+      for (let i=companies.length-1; i>=0; i--) {
+        if (companies[i].toLowerCase() === url.name.toLowerCase()) {
+          companies.splice(i, 1);
+        }
+      } 
     });
-  });
 
-  async.parallel(asyncTasks, (err, results) => {
-    if (err) {
-      return cb(err);
-    }
-
-    results.forEach(item => {
-      const { error, body } = item[0];
-
-      // any errors at all, we fail the lot
-      if (error) {
-        return cb("Error: Request failed.");
-      }
-
-      const obj = JSON.parse(body);
+    // add the companies to mongo that were not returned
+    const asyncTasks = [];
+    companies.forEach(c => {
       const newItem = new Url({
-        name: obj.queries.request[0].searchTerms,
-        domain: obj.items ? obj.items[0].displayLink : '< Not Found >'
+        name: c.toLowerCase()
       });
 
-      items.push(newItem);
-      process.nextTick(() => newItem.save());
+      asyncTasks.push(cb => {
+        newItem.save(cb);
+      });
     });
 
-    return cb(null, items);
+    async.parallel(asyncTasks, (err, results) => {
+      results.forEach(item => {
+        urls.push(item[0]);
+      });
+      resolve(urls);
+    });
   });
 }
 
 module.exports = {
-  fetch: function(req, res) {
-    const qs_params = url.parse(req.url, true).query;
-    // the documentation requested 'companies[]' for the query string argument
-    // i don't endorse using []'s inside of a query string, but i took the challenge.
-    const parms = qs_params['companies[]'];
-    let companies = [];
-    if (typeof parms === 'string') {
-      companies.push(parms);
-    }
-    else if (parms) {
-      companies = parms;
-    }
-
-    let doc = { data: [], length: companies.length };
-
-    // check each name with mongo first so that we don't hit
-    // the api for a url we already have
-    Url.find({ name: { $in: companies }})
-      .then(urls => {
-        urls.forEach(url => {
-          doc.data.push(url);
-
-          // remove company so it's not called for the gcs api        
-          for (let i=companies.length-1; i>=0; i--) {
-            if (companies[i].toLowerCase() === url.name.toLowerCase()) {
-              companies.splice(i, 1);
-            }
-          } 
-        });
-
-        if (companies.length > 0) {
-          callGcsApi(companies, (err, apiResults) => {
-            if (err) {
-              return res.json(err);
-            }
-
-            //doc.data = [...doc.data, apiResults];
-            apiResults.forEach(url => {
-              doc.data.push(url);
-            });
-            return res.json(doc);
-          });
-        }
-        else {
-          return res.json(doc);
-        }
-      }).catch(err => {
-        return res.json(err);
-      });
-  },
   index: function(req, res) {
-    let query = req.query;
-    if (!query) {
-      query = req.params.id ? { _id: req.params.id } : {};
-    }
+    if (req.query) {
+      const pCompanies = req.query['companies'];
 
-    Url.find(query)
-      .then(function(doc) {
-        res.json(doc);
-      }).catch(function(err) {
-        res.json(err);
-      });
+      if (pCompanies) {
+        let companies = [];
+        if (typeof pCompanies === 'string') {
+          if (pCompanies.indexOf(',') > 0) {
+            companies = pCompanies.split(',');
+          }
+          else {
+            companies = [ pCompanies ];
+          }
+        }
+        else if (Array.isArray(pCompanies)) {
+          companies = pCompanies;
+        }
+
+        // add to mongo if not found
+        Url.find({ name: { $in: companies.map(o => o.toLowerCase()) }})
+          .then(function(doc) {
+            return companyWorker(companies, doc)
+              .then(urls => {
+                res.json(urls);
+              });
+          }).catch(function(err) {
+            res.json(err);
+          });
+      }
+      else {
+        const query = req.query['id'] ? { _id: req.query['id'] } : {};
+
+        Url.find(query)
+          .then(function(doc) {
+            res.json(doc);
+          }).catch(function(err) {
+            res.json(err);
+          });
+      }
+    }
   },
+
   create: function(req, res) {
     Url.create(req.body).then(function(doc) {
       res.json(doc);
@@ -114,6 +84,7 @@ module.exports = {
       res.json(err);
     });
   },
+
   update: function(req, res) {
     Url.update({
       _id: req.params.id
@@ -125,6 +96,7 @@ module.exports = {
       res.json(err);
     });
   },
+
   destroy: function(req, res) {
     Url.remove({
       _id: req.params.id

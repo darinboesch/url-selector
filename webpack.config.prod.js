@@ -32,6 +32,7 @@ export default {
         exclude: /node_modules/,
         loaders: ['babel']
       },
+      { test: /\.json$/, loader: 'json-loader' },
       {
         test: /\.css$/,
         loader: ExtractTextPlugin.extract('style-loader', 'css-loader?modules&importLoaders=1&localIdentName=[name]__[local]___[hash:base64:5]!postcss-loader')
@@ -50,8 +51,16 @@ export default {
   plugins: [
     new webpack.optimize.OccurenceOrderPlugin(),
     new webpack.DefinePlugin(GLOBALS),
+    new webpack.DefinePlugin({ 'typeof window': JSON.stringify("object") }),
     new ExtractTextPlugin('styles.css', { allChunks: true }),
     new webpack.optimize.DedupePlugin(),
     new webpack.optimize.UglifyJsPlugin()
-  ]
+  ],
+
+  node: {
+    console: true,
+    fs: 'empty',
+    net: 'empty',
+    tls: 'empty'
+  }
 };

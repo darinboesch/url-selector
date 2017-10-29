@@ -1,6 +1,7 @@
 import * as types from './actionTypes';
 // import urlApi from '../api/mockUrlApi';
-import urlApi from '../api/urlApi';
+import UrlApi from '../api/urlApi';
+import GoogleApi from '../api/googleApi';
 import {beginAjaxCall, ajaxCallError} from './ajaxStatusActions';
 
 export function loadUrlsSuccess(urls) {
@@ -26,7 +27,7 @@ export function deleteUrlSuccess(url) {
 export function loadUrls() {
   return function(dispatch) {
     dispatch(beginAjaxCall());
-    return urlApi.getAllUrls().then(res => {
+    return UrlApi.getAllUrls().then(res => {
       // todo - validate 'data' property (else handle error)
       dispatch(loadUrlsSuccess(res.data));
     }).catch(error => {
@@ -39,7 +40,7 @@ export function loadUrls() {
 export function saveUrl(url) {
   return function (dispatch, getState) {
     dispatch(beginAjaxCall());
-    return urlApi.saveUrl(url).then(url => {
+    return UrlApi.saveUrl(url).then(url => {
       url._id ? dispatch(updateUrlSuccess(url)) :
         dispatch(createUrlSuccess(url));
     }).catch(error => {
@@ -51,12 +52,13 @@ export function saveUrl(url) {
 
 export function favoriteUrl(url) {
   return function (dispatch, getState) {
-    url.favorited = !url.favorited;
+    let newUrl = Object.assign({}, url);
+    newUrl.favorited = !url.favorited;
 
     dispatch(beginAjaxCall());
-    return urlApi.favoriteUrl(url).then(res => {
+    return UrlApi.favoriteUrl(newUrl).then(res => {
       if (res.data && res.data.nModified === 1) {
-        dispatch(updateUrlSuccess(url));
+        dispatch(updateUrlSuccess(newUrl));
       }
       else {
         dispatch(updateUrlFail());
@@ -71,13 +73,86 @@ export function favoriteUrl(url) {
 export function deleteUrl(url) {
   return function (dispatch, getState) {
     dispatch(beginAjaxCall());
-    return urlApi.deleteUrl(url._id).then(res => {
+    return UrlApi.deleteUrl(url._id).then(res => {
       if (res.data && res.data.n === 1) {
         dispatch(deleteUrlSuccess(url));
       }
       else {
         dispatch(updateUrlFail());
       }
+    }).catch(error => {
+      dispatch(ajaxCallError(error));
+      throw(error);
+    });
+  };
+}
+
+function mergeArrays(arr1, arr2) {
+  const result = arr1.map((url) => {
+    const newUrl = arr2.find(o => o.name === url.name);
+    if (newUrl) {
+      newUrl.drop = true;
+      return Object.assign({}, newUrl);
+    }
+    else {
+      return Object.assign({}, url, { isNew: false });
+    }
+  });
+
+  return [...result, ...arr2.filter(o => !o.drop)];
+}
+
+export function loadUrlsByCompanyList(names) {
+  return function (dispatch, getState) {
+    dispatch(beginAjaxCall());
+    return UrlApi.getUrlsForCompanies(names).then(res => {
+      const data = res.data;
+      const existingUrls = getState().urls;
+
+      return new Promise((resolve, reject) => {
+        data.forEach(u => u.isNew = true);
+
+        // call google api for url's that don't have a source
+        let companies = data.reduce((company, url) => {
+          if (url.source === '') {
+            company.push(url.name);
+          }
+          return company;
+        }, []);
+
+        if (companies.length > 0) {
+          return GoogleApi.customSearch(companies)
+            .then(res => {
+              // update the values on our return set
+              const newUrls = [];
+              res.data.forEach(url => {
+                let newUrl = data.find(u => u.name === url.name);
+                newUrl.domain = url.domain;
+                newUrl.source = 'google';
+                newUrls.push(newUrl);
+              });
+
+              // update the returned urls in mongo
+              return UrlApi.updateUrls(newUrls)
+                .then(() => {
+                  dispatch(loadUrlsSuccess(mergeArrays(existingUrls, data)));
+                  resolve(data);
+                })
+                .catch(error => {
+                  dispatch(ajaxCallError(error));
+                  reject(error);
+                });
+            })
+            .catch(error => {
+              dispatch(ajaxCallError(error));
+              reject(error);
+            });
+        }
+        else {
+          dispatch(loadUrlsSuccess(mergeArrays(existingUrls, data)));
+          resolve(data);
+        }
+      });
     }).catch(error => {
       dispatch(ajaxCallError(error));
       throw(error);

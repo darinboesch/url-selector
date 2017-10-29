@@ -1,20 +1,18 @@
 import React, { Component } from "react";
+import {bindActionCreators} from 'redux';
+import {connect} from 'react-redux';
 import PropTypes from "prop-types";
-import API from "../../utils/API";
 import styles from './Panel.css';
 import toastr from 'toastr';
-
 import * as urlActions from '../../actions/urlActions';
-import {connect} from 'react-redux';
-import {bindActionCreators} from 'redux';
 
 class Panel extends Component {
   constructor(props, context) {
     super(props, context);
 
-    this.state = {
-      url: Object.assign({}, this.props.url)
-    };
+    // this.state = {
+    //   url: Object.assign({}, this.props.url)
+    // };
 
     this.handleDeleteClick = this.handleDeleteClick.bind(this);
     this.handleFavoriteClick = this.handleFavoriteClick.bind(this);
@@ -22,9 +20,7 @@ class Panel extends Component {
   handleFavoriteClick() {
     event.preventDefault();
 
-    this.props.actions.favoriteUrl(this.state.url)
-      //.then(() => this.redirect())   figure out how to change the state
-      .then()
+    this.props.actions.favoriteUrl(this.props.url)
       .catch(error => {
         toastr.error(error);
       });
@@ -32,8 +28,7 @@ class Panel extends Component {
   handleDeleteClick() {
     event.preventDefault();
 
-    this.props.actions.deleteUrl(this.state.url)
-      .then()
+    this.props.actions.deleteUrl(this.props.url)
       .catch(error => {
         toastr.error(error);
       });
@@ -46,7 +41,7 @@ class Panel extends Component {
             <i
               onClick={this.handleFavoriteClick}
               style={{ display: this.props.showFavorite ? "block" : "none" }}
-              className={styles.favorite + " " + (this.state.url.favorited ? "fa fa-star " + styles.gold : "fa fa-star-o")}
+              className={styles.favorite + " " + (this.props.url.favorited ? "fa fa-star " + styles.gold : "fa fa-star-o")}
               aria-hidden="true"
             />
             <i
@@ -55,11 +50,11 @@ class Panel extends Component {
               className={styles.delete + " " + "fa fa-trash-o"}
               aria-hidden="true"
             />
-            <span className={styles.urlName}>{this.state.url.name}</span>
+            <span className={styles.urlName}>{this.props.url.name}</span>
           </div>
           <div className="panel-body">
             <div>
-              <span>{this.state.url.domain}</span>
+              <span>{this.props.url.domain}</span>
             </div>
           </div>
         </div>

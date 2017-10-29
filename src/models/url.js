@@ -1,16 +1,19 @@
 const mongoose = require("mongoose");
 
-const Schema = mongoose.Schema;
-
-const urlSchema = new Schema({
-  name: { type: String, unique: true },
+const urlSchema = new mongoose.Schema({
+  name: {
+    type: String,
+    unique: true
+  },
   domain: String,
   favorited: {
     type: Boolean,
     default: false
+  },
+  source: {
+    type: String,
+    default: ''
   }
 });
 
-const Url = mongoose.model("URL", urlSchema);
-
-module.exports = Url;
+const Url = module.exports = mongoose.model('Url', urlSchema);
