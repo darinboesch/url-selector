@@ -9,17 +9,16 @@ class Home extends Component {
   constructor(props, context) {
     super(props, context);
 
-    this.state = {
-      newUrls: Object.assign([], this.props.newUrls)
-    };
+    // this.state = {
+    //   urls: Object.assign([], this.props.urls)
+    // };
   }
   renderUrls() {
-    const {newUrls} = this.props;
-    return newUrls.map(url => (
+    const {urls} = this.props;
+    return urls.map(url => (
       <Panel
         url={url}
         key={url._id}
-        useNew
       />
     ));
   }
@@ -39,12 +38,12 @@ class Home extends Component {
 }
 
 Home.propTypes = {
-  newUrls: PropTypes.array.isRequired
+  urls: PropTypes.array.isRequired
 };
 
 function mapStateToProps(state, ownProps) {
   return {
-    newUrls: state.newUrls
+    urls: state.urls.filter(url => url.isNew)
   };
 }
 

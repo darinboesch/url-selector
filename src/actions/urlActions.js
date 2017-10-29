@@ -95,12 +95,31 @@ export function deleteUrl(url) {
   };
 }
 
+function mergeArrays(arr1, arr2) {
+  const result = arr1.map((url) => {
+    const newUrl = arr2.find(o => o.name === url.name);
+    if (newUrl) {
+      newUrl.drop = true;
+      return Object.assign({}, newUrl);
+    }
+    else {
+      return Object.assign({}, url, { isNew: false });
+    }
+  });
+
+  return [...result, ...arr2.filter(o => !o.drop)];
+}
+
 export function loadUrlsByCompanyList(names) {
   return function (dispatch, getState) {
     dispatch(beginAjaxCall());
     return UrlApi.getUrlsForCompanies(names).then(res => {
       const data = res.data;
+      const existingUrls = getState().urls;
+
       return new Promise((resolve, reject) => {
+        data.forEach(u => u.isNew = true);
+
         // call google api for url's that don't have a source
         let companies = data.reduce((company, url) => {
           if (url.source === '') {
@@ -124,7 +143,7 @@ export function loadUrlsByCompanyList(names) {
               // update the returned urls in mongo
               return UrlApi.updateUrls(newUrls)
                 .then(() => {
-                  dispatch(loadUrlsByCompanyListSuccess(data));
+                  dispatch(loadUrlsSuccess(mergeArrays(existingUrls, data)));
                   resolve(data);
                 })
                 .catch(error => {
@@ -138,7 +157,7 @@ export function loadUrlsByCompanyList(names) {
             });
         }
         else {
-          dispatch(loadUrlsByCompanyListSuccess(data));
+          dispatch(loadUrlsSuccess(mergeArrays(existingUrls, data)));
           resolve(data);
         }
       });
