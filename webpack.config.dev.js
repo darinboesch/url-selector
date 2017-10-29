@@ -16,8 +16,7 @@ export default {
   output: {
     path: __dirname + '/dist',
     publicPath: '/',
-    filename: "bundle.js",
-    libraryTarget: 'umd'
+    filename: "bundle.js"
   },
 
   devServer: {

@@ -1,13 +1,14 @@
-import request from "request";
-import async from "async";
-import config from "../../config.dev";
+const request = require("request");
+const async = require("async");
+const config = require("../../config.dev");
+const mongoose = require("mongoose");
 
-class GoogleApi {
-  static customSearch(companies, cb) {
+module.exports = {
+  customSearch: function(companies, cb) {
     const errMsg = "Error: Request failed.";
     const asyncTasks = [];
     const { url, cx, key } = config.gcsApi;
-    const response = { data: [] };
+    const items = [];
 
     return new Promise((resolve, reject) => {
       companies.forEach(name => {
@@ -40,18 +41,11 @@ class GoogleApi {
 
           // items.push(newItem);
           // process.nextTick(() => newItem.save());
-          response.data.push({
-            name: obj.queries.request[0].searchTerms.toLowerCase(),
-            domain: obj.items ? obj.items[0].displayLink : '< Not Found >'
-          });
         });
 
-        if (cb) { cb(null, response); }
-        resolve(response);
+        if (cb) { cb(null, items); }
+        resolve(items);
       });
     });
-
   }
-}
-
-export default GoogleApi;
+};

@@ -1,7 +1,7 @@
 import * as types from './actionTypes';
 // import urlApi from '../api/mockUrlApi';
 import UrlApi from '../api/urlApi';
-import googleApi from '../api/googleApi';
+import GoogleApi from '../api/googleApi';
 import {beginAjaxCall, ajaxCallError} from './ajaxStatusActions';
 
 export function loadUrlsSuccess(urls) {
@@ -24,8 +24,8 @@ export function deleteUrlSuccess(url) {
   return { type: types.DELETE_URL_SUCCESS, url };
 }
 
-export function loadUrlsByCompanyListSuccess(urls) {
-  return { type: types.LOAD_URLS_BY_COMPANY_LIST_SUCCESS, urls };
+export function loadUrlsByCompanyListSuccess(newUrls) {
+  return { type: types.LOAD_URLS_BY_COMPANY_LIST_SUCCESS, newUrls };
 }
 
 export function loadUrlsByCompanyListFail() {
@@ -60,12 +60,13 @@ export function saveUrl(url) {
 
 export function favoriteUrl(url) {
   return function (dispatch, getState) {
-    url.favorited = !url.favorited;
+    let newUrl = Object.assign({}, url);
+    newUrl.favorited = !url.favorited;
 
     dispatch(beginAjaxCall());
-    return UrlApi.favoriteUrl(url).then(res => {
+    return UrlApi.favoriteUrl(newUrl).then(res => {
       if (res.data && res.data.nModified === 1) {
-        dispatch(updateUrlSuccess(url));
+        dispatch(updateUrlSuccess(newUrl));
       }
       else {
         dispatch(updateUrlFail());
@@ -98,61 +99,49 @@ export function loadUrlsByCompanyList(names) {
   return function (dispatch, getState) {
     dispatch(beginAjaxCall());
     return UrlApi.getUrlsForCompanies(names).then(res => {
-      let companies = Object.assign([], names);
-      let data = [];
-      res.data.forEach(url => {
-        data.push(url);
-
-        // remove company so it's not called for the gcs api        
-        for (let i=companies.length-1; i>=0; i--) {
-          if (companies[i].toLowerCase() === url.name.toLowerCase()) {
-            companies.splice(i, 1);
+      const data = res.data;
+      return new Promise((resolve, reject) => {
+        // call google api for url's that don't have a source
+        let companies = data.reduce((company, url) => {
+          if (url.source === '') {
+            company.push(url.name);
           }
-        } 
+          return company;
+        }, []);
+
+        if (companies.length > 0) {
+          return GoogleApi.customSearch(companies)
+            .then(res => {
+              // update the values on our return set
+              const newUrls = [];
+              res.data.forEach(url => {
+                let newUrl = data.find(u => u.name === url.name);
+                newUrl.domain = url.domain;
+                newUrl.source = 'google';
+                newUrls.push(newUrl);
+              });
+
+              // update the returned urls in mongo
+              return UrlApi.updateUrls(newUrls)
+                .then(() => {
+                  dispatch(loadUrlsByCompanyListSuccess(data));
+                  resolve(data);
+                })
+                .catch(error => {
+                  dispatch(ajaxCallError(error));
+                  reject(error);
+                });
+            })
+            .catch(error => {
+              dispatch(ajaxCallError(error));
+              reject(error);
+            });
+        }
+        else {
+          dispatch(loadUrlsByCompanyListSuccess(data));
+          resolve(data);
+        }
       });
-
-      if (companies.length > 0) {
-        // googleApi.customSearch(companies)
-        //   .then(res => console.log(res))
-        //   .catch(err => console.log('Error: ' + err));
-      }
-
-      dispatch(loadUrlsByCompanyListSuccess(data));
-
-  //     .then(urls => {
-  //       urls.forEach(url => {
-  //         doc.data.push(url);
-
-  //         // remove company so it's not called for the gcs api        
-  //         for (let i=companies.length-1; i>=0; i--) {
-  //           if (companies[i].toLowerCase() === url.name.toLowerCase()) {
-  //             companies.splice(i, 1);
-  //           }
-  //         } 
-  //       });
-
-  //       if (companies.length > 0) {
-  //         callGcsApi(companies, (err, apiResults) => {
-  //           if (err) {
-  //             return res.json(err);
-  //           }
-
-  //           //doc.data = [...doc.data, apiResults];
-  //           apiResults.forEach(url => {
-  //             doc.data.push(url);
-  //           });
-  //           return res.json(doc);
-  //         });
-  //       }
-  //       else {
-  //         return res.json(doc);
-  //       }
-  //     }).catch(err => {
-  //       return res.json(err);
-  //     });      // todo - validate 'data' property (else handle error)
-
- //     dispatch(loadUrlsByCompanyListSuccess(res.data));
-      // searchCompaniesFail()
     }).catch(error => {
       dispatch(ajaxCallError(error));
       throw(error);

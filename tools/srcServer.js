@@ -1,7 +1,5 @@
 import express from 'express';
 import webpack from 'webpack';
-import mongoose from 'mongoose';
-import bluebird from 'bluebird';
 import bodyParser from 'body-parser';
 import path from 'path';
 import config from '../webpack.config.dev';
@@ -12,17 +10,7 @@ import open from 'open';
 const port = process.env.PORT || 3000;
 const app = express();
 const compiler = webpack(config);
-const db = process.env.MONGODB_URI || "mongodb://localhost/urlSelectorApp";
-
-mongoose.Promise = bluebird;
-mongoose.connect(db, { useMongoClient: true }, function(error) {
-  if (error) {
-    console.error(error);
-  }
-  else {
-    console.log("mongoose connection is successful");
-  }
-});
+require('../src/models/db');
 
 app.use(require('webpack-dev-middleware')(compiler, {
   noInfo: true,
@@ -45,6 +33,3 @@ app.listen(port, function(err) {
     open(`http://localhost:${port}`);
   }
 });
-
-
-

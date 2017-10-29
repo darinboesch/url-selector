@@ -10,15 +10,16 @@ class Home extends Component {
     super(props, context);
 
     this.state = {
-      urls: Object.assign([], this.props.urls)
+      newUrls: Object.assign([], this.props.newUrls)
     };
   }
   renderUrls() {
-    const {urls} = this.props;
-    return urls.map(url => (
+    const {newUrls} = this.props;
+    return newUrls.map(url => (
       <Panel
         url={url}
         key={url._id}
+        useNew
       />
     ));
   }
@@ -38,12 +39,12 @@ class Home extends Component {
 }
 
 Home.propTypes = {
-  urls: PropTypes.array.isRequired
+  newUrls: PropTypes.array.isRequired
 };
 
 function mapStateToProps(state, ownProps) {
   return {
-    urls: state.newUrls
+    newUrls: state.newUrls
   };
 }
 

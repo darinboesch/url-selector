@@ -10,9 +10,9 @@ class Panel extends Component {
   constructor(props, context) {
     super(props, context);
 
-    this.state = {
-      url: Object.assign({}, this.props.url)
-    };
+    // this.state = {
+    //   url: Object.assign({}, this.props.url)
+    // };
 
     this.handleDeleteClick = this.handleDeleteClick.bind(this);
     this.handleFavoriteClick = this.handleFavoriteClick.bind(this);
@@ -20,7 +20,7 @@ class Panel extends Component {
   handleFavoriteClick() {
     event.preventDefault();
 
-    this.props.actions.favoriteUrl(this.state.url)
+    this.props.actions.favoriteUrl(this.props.url)
       .catch(error => {
         toastr.error(error);
       });
@@ -28,7 +28,7 @@ class Panel extends Component {
   handleDeleteClick() {
     event.preventDefault();
 
-    this.props.actions.deleteUrl(this.state.url)
+    this.props.actions.deleteUrl(this.props.url)
       .catch(error => {
         toastr.error(error);
       });
@@ -41,7 +41,7 @@ class Panel extends Component {
             <i
               onClick={this.handleFavoriteClick}
               style={{ display: this.props.showFavorite ? "block" : "none" }}
-              className={styles.favorite + " " + (this.state.url.favorited ? "fa fa-star " + styles.gold : "fa fa-star-o")}
+              className={styles.favorite + " " + (this.props.url.favorited ? "fa fa-star " + styles.gold : "fa fa-star-o")}
               aria-hidden="true"
             />
             <i
@@ -50,11 +50,11 @@ class Panel extends Component {
               className={styles.delete + " " + "fa fa-trash-o"}
               aria-hidden="true"
             />
-            <span className={styles.urlName}>{this.state.url.name}</span>
+            <span className={styles.urlName}>{this.props.url.name}</span>
           </div>
           <div className="panel-body">
             <div>
-              <span>{this.state.url.domain}</span>
+              <span>{this.props.url.domain}</span>
             </div>
           </div>
         </div>
@@ -67,6 +67,7 @@ Panel.defaultProps = { showFavorite: false, showDelete: false };
 
 Panel.propTypes = {
   url: PropTypes.object.isRequired,
+  useNew: PropTypes.bool,
   showFavorite: PropTypes.bool,
   showDelete: PropTypes.bool,
   actions: PropTypes.object.isRequired
@@ -80,9 +81,10 @@ function getUrlById(urls, id) {
 
 function mapStateToProps(state, ownProps) {
   const urlId = ownProps.url._id;
+  const name = ownProps.useNew ? 'newUrls' : 'urls';
 
   return {
-    url: getUrlById(state.urls, urlId)
+    url: getUrlById(state[name], urlId)
   };
 }
 
