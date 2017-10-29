@@ -67,7 +67,6 @@ Panel.defaultProps = { showFavorite: false, showDelete: false };
 
 Panel.propTypes = {
   url: PropTypes.object.isRequired,
-  useNew: PropTypes.bool,
   showFavorite: PropTypes.bool,
   showDelete: PropTypes.bool,
   actions: PropTypes.object.isRequired
@@ -81,10 +80,9 @@ function getUrlById(urls, id) {
 
 function mapStateToProps(state, ownProps) {
   const urlId = ownProps.url._id;
-  const name = ownProps.useNew ? 'newUrls' : 'urls';
 
   return {
-    url: getUrlById(state[name], urlId)
+    url: getUrlById(state.urls, urlId)
   };
 }
 

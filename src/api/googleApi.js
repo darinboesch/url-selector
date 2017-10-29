@@ -33,13 +33,6 @@ class GoogleApi {
           }
 
           const obj = JSON.parse(body);
-          // const newItem = new Url({
-          //   name: obj.queries.request[0].searchTerms,
-          //   domain: obj.items ? obj.items[0].displayLink : '< Not Found >'
-          // });
-
-          // items.push(newItem);
-          // process.nextTick(() => newItem.save());
           response.data.push({
             name: obj.queries.request[0].searchTerms.toLowerCase(),
             domain: obj.items ? obj.items[0].displayLink : '< Not Found >'

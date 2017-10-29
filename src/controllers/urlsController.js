@@ -4,35 +4,33 @@ import async from "async";
 
 function companyWorker(companies, urls) {
   return new Promise((resolve, reject) => {
+    urls.forEach(url => {
+      // remove company so it's not called for the gcs api        
+      for (let i=companies.length-1; i>=0; i--) {
+        if (companies[i].toLowerCase() === url.name.toLowerCase()) {
+          companies.splice(i, 1);
+        }
+      } 
+    });
 
-            urls.forEach(url => {
-              // remove company so it's not called for the gcs api        
-              for (let i=companies.length-1; i>=0; i--) {
-                if (companies[i].toLowerCase() === url.name.toLowerCase()) {
-                  companies.splice(i, 1);
-                }
-              } 
-            });
+    // add the companies to mongo that were not returned
+    const asyncTasks = [];
+    companies.forEach(c => {
+      const newItem = new Url({
+        name: c.toLowerCase()
+      });
 
-            // add the companies to mongo that were not returned
-            const asyncTasks = [];
-            companies.forEach(c => {
-              const newItem = new Url({
-                name: c.toLowerCase()
-              });
+      asyncTasks.push(cb => {
+        newItem.save(cb);
+      });
+    });
 
-              asyncTasks.push(cb => {
-                newItem.save(cb);
-              });
-            });
-
-            async.parallel(asyncTasks, (err, results) => {
-              results.forEach(item => {
-                urls.push(item[0]);
-              });
-              resolve(urls);
-            });
-
+    async.parallel(asyncTasks, (err, results) => {
+      results.forEach(item => {
+        urls.push(item[0]);
+      });
+      resolve(urls);
+    });
   });
 }
 
@@ -58,21 +56,10 @@ module.exports = {
         // add to mongo if not found
         Url.find({ name: { $in: companies.map(o => o.toLowerCase()) }})
           .then(function(doc) {
-
             return companyWorker(companies, doc)
               .then(urls => {
                 res.json(urls);
               });
-            // companies.forEach(c => {
-            //   const newItem = new Url({
-            //     name: c.toLowerCase()
-            //   });
-
-            //   doc.push(newItem);
-            //   process.nextTick(() => newItem.save());
-            // });
-
-            //res.json(doc);
           }).catch(function(err) {
             res.json(err);
           });
@@ -86,8 +73,8 @@ module.exports = {
           }).catch(function(err) {
             res.json(err);
           });
-        }
       }
+    }
   },
 
   create: function(req, res) {

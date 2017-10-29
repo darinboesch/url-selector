@@ -24,14 +24,6 @@ export function deleteUrlSuccess(url) {
   return { type: types.DELETE_URL_SUCCESS, url };
 }
 
-export function loadUrlsByCompanyListSuccess(newUrls) {
-  return { type: types.LOAD_URLS_BY_COMPANY_LIST_SUCCESS, newUrls };
-}
-
-export function loadUrlsByCompanyListFail() {
-  return { type: types.LOAD_URLS_BY_COMPANY_LIST_FAIL };
-}
-
 export function loadUrls() {
   return function(dispatch) {
     dispatch(beginAjaxCall());
