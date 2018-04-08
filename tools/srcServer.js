@@ -4,6 +4,7 @@ import bodyParser from 'body-parser';
 import path from 'path';
 import config from '../webpack.config.dev';
 import open from 'open';
+import passport from 'passport';
 
 /* eslint-disable no-console */
 
@@ -23,6 +24,16 @@ app.use(bodyParser.urlencoded({ extended: true }));
 app.use(bodyParser.json());
 app.use(express.static(__dirname + "/dist"));
 
+app.use(passport.initialize());
+const localSignupStrategy = require('../src/passport/local-signup');
+const localLoginStrategy = require('../src/passport/local-login');
+passport.use('local-signup', localSignupStrategy);
+passport.use('local-login', localLoginStrategy);
+
+const authCheckMiddleware = require('../src/middleware/auth-check');
+app.use('/api', authCheckMiddleware);
+
+require("../src/routes/auth")(app);
 require("../src/routes/apiRoutes")(app);
 require("../src/routes/htmlRoutes")(app);
 

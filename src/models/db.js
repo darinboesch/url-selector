@@ -27,3 +27,4 @@ process.on('SIGINT', function() {
 
 // add models here
 require('./url');
+require('./user');

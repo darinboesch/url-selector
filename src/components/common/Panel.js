@@ -10,10 +10,6 @@ class Panel extends Component {
   constructor(props, context) {
     super(props, context);
 
-    // this.state = {
-    //   url: Object.assign({}, this.props.url)
-    // };
-
     this.handleDeleteClick = this.handleDeleteClick.bind(this);
     this.handleFavoriteClick = this.handleFavoriteClick.bind(this);
   }
